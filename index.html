@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTF Manager – Vayalat Mahindra</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2230;--border:#2a3342;--accent:#e63946;--accent2:#f4a261;--text:#e6edf3;--muted:#8b949e;--green:#2ea043;--yellow:#d29922;--blue:#388bfd;--red:#e63946;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+header{background:var(--surface);border-bottom:2px solid var(--accent);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+header h1{font-family:'Rajdhani',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:2px;}
+header h1 span{color:var(--accent);}
+.header-sub{font-size:0.72rem;color:var(--muted);letter-spacing:1px;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:5px;}
+.sync-dot.ok{background:var(--green);animation:pulse 2s infinite;}
+.sync-dot.err{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.main{max-width:1200px;margin:0 auto;padding:24px 16px;}
+.tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface);border-radius:10px;padding:6px;}
+.tab{flex:1;padding:10px 8px;background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:1px;cursor:pointer;border-radius:7px;transition:all 0.2s;}
+.tab.active{background:var(--accent);color:#fff;}
+.tab:hover:not(.active){background:var(--border);color:var(--text);}
+.setup-panel{background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:24px;margin-bottom:24px;}
+.setup-panel h2{font-family:'Rajdhani',sans-serif;font-size:1.3rem;color:var(--accent);margin-bottom:8px;}
+.step{display:flex;gap:14px;margin-bottom:16px;align-items:flex-start;}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.step-body{font-size:0.87rem;color:var(--muted);line-height:1.7;}
+.step-body strong{color:var(--text);}
+.step-body a{color:var(--blue);}
+.irow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.irow input{flex:1;min-width:220px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:0.87rem;outline:none;}
+.irow input:focus{border-color:var(--accent);}
+.btn{padding:9px 16px;border-radius:8px;border:none;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:0.87rem;letter-spacing:1px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#c1121f;}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--accent);}
+.btn-sm{padding:5px 10px;font-size:0.78rem;}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-success{background:var(--green);color:#fff;}
+.btn-blue{background:#0d2233;color:#60d0f0;border:1px solid #1e6a8a;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+.stat-card .num{font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;}
+.stat-card .lbl{font-size:0.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.stat-card.all .num{color:var(--blue);}
+.stat-card.pend .num{color:var(--yellow);}
+.stat-card.prog .num{color:var(--accent2);}
+.stat-card.done .num{color:var(--green);}
+.sec{font-family:'Rajdhani',sans-serif;font-size:0.95rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.srow{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.srow input,.srow select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:0.87rem;outline:none;}
+.srow input{flex:1;min-width:200px;}
+.srow input:focus,.srow select:focus{border-color:var(--accent);}
+.jlist{display:flex;flex-direction:column;gap:12px;}
+.jcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s;border-left:4px solid var(--border);}
+.jcard:hover{border-color:var(--accent);transform:translateY(-1px);}
+.jcard.s-pending{border-left-color:var(--yellow);}
+.jcard.s-in-progress{border-left-color:var(--accent2);}
+.jcard.s-done{border-left-color:var(--green);}
+.jhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.jtitle{font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;}
+.jmeta{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+.mi{font-size:0.76rem;color:var(--muted);}
+.mi strong{color:var(--text);}
+.badge{padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+.b-pending{background:#3a2a00;color:var(--yellow);}
+.b-in-progress{background:#3a2000;color:var(--accent2);}
+.b-done{background:#0a2a0a;color:var(--green);}
+.chips{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;}
+.chip{background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:20px;font-size:0.72rem;color:var(--muted);}
+.jact{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);display:flex;align-items:flex-start;justify-content:center;z-index:999;padding:20px;overflow-y:auto;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:700px;padding:24px;position:relative;margin:auto;}
+.modal h2{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:20px;color:var(--accent);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.f{display:flex;flex-direction:column;gap:5px;}
+.f label{font-size:0.74rem;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
+.f input,.f select,.f textarea{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:0.87rem;outline:none;font-family:'DM Sans',sans-serif;}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--accent);}
+.itable{width:100%;border-collapse:collapse;margin-bottom:10px;}
+.itable th{font-size:0.72rem;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);}
+.itable td{padding:4px 5px;}
+.itable input,.itable select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:6px;font-size:0.8rem;width:100%;outline:none;font-family:'DM Sans',sans-serif;}
+.mfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;}
+.xbtn{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;}
+.xbtn:hover{color:var(--text);}
+.dtable{width:100%;border-collapse:collapse;}
+.dtable th,.dtable td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);font-size:0.83rem;}
+.dtable th{color:var(--muted);font-size:0.72rem;text-transform:uppercase;}
+.trow{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;color:var(--accent2);}
+.scanbox{background:var(--bg);border:2px dashed var(--border);border-radius:12px;padding:30px;text-align:center;cursor:pointer;transition:border 0.2s;margin-bottom:16px;}
+.scanbox:hover{border-color:var(--blue);}
+.sprev{width:100%;max-height:200px;object-fit:contain;border-radius:8px;margin-bottom:12px;}
+.aout{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:0.82rem;color:var(--muted);max-height:150px;overflow-y:auto;font-family:monospace;white-space:pre-wrap;}
+.pbar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin:8px 0;}
+.pfill{height:100%;background:var(--accent);width:0%;transition:width 0.4s;}
+.hidden{display:none!important;}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface2);border:1px solid var(--border);padding:12px 18px;border-radius:8px;font-size:0.85rem;z-index:9999;animation:tin 0.3s ease;border-left:3px solid var(--green);}
+@keyframes tin{from{transform:translateX(100px);opacity:0}to{transform:none;opacity:1}}
+@media(max-width:600px){.fg{grid-template-columns:1fr;}.tab{font-size:0.72rem;padding:8px 4px;}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>OTF <span>MANAGER</span></h1>
+    <div class="header-sub"><span class="sync-dot" id="sdot"></span><span id="slbl">Local only</span></div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="btn btn-secondary btn-sm" onclick="syncNow()">🔄</button>
+    <button class="btn btn-primary" onclick="openNew()">+ NEW JOB</button>
+  </div>
+</header>
+
+<div class="main">
+
+<!-- SETUP -->
+<div id="setup" class="setup-panel">
+  <h2>☁️ Connect to Google Sheets — One-time Setup</h2>
+  <p style="color:var(--muted);font-size:0.86rem;margin-bottom:16px;">Follow these steps once to sync across all devices:</p>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">Go to <a href="https://sheets.new" target="_blank"><strong>sheets.new</strong></a>. Create a new Google Sheet and name it <strong>OTF Jobs</strong>.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      Click <strong>Extensions → Apps Script</strong>. Delete all existing code. Click the button below to copy the script, paste it in, then click <strong>💾 Save</strong>.
+      <div style="margin-top:8px;">
+        <button class="btn btn-secondary btn-sm" onclick="copyScript()">📋 Copy Apps Script</button>
+        <span id="cok" class="hidden" style="font-size:0.78rem;color:var(--green);margin-left:8px;">✓ Copied!</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      In Apps Script click <strong>Deploy → New deployment</strong>.<br>
+      Set type: <strong>Web app</strong> · Execute as: <strong>Me</strong> · Who has access: <strong>Anyone</strong>.<br>
+      Click <strong>Deploy</strong>, authorise when asked, then copy the <strong>Web app URL</strong>.
+      <div class="irow"><input id="inp-script" placeholder="Paste Web App URL here  (https://script.google.com/macros/s/…/exec)"></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      Go back to your Google Sheet. Click <strong>Share → change to "Anyone with the link" → Viewer → Done</strong>.<br>
+      Copy the full URL from the browser address bar and paste below:
+      <div class="irow">
+        <input id="inp-sheet" placeholder="Paste Sheet URL here  (https://docs.google.com/spreadsheets/d/…)">
+        <button class="btn btn-primary" onclick="connectSheet()">🔗 Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:0.78rem;color:var(--muted);margin-top:4px;">No Google account? App works locally.
+    <button class="btn btn-secondary btn-sm" style="margin-left:8px;" onclick="skipSetup()">Skip</button>
+  </p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="goTab('dashboard')">📊 Dashboard</button>
+  <button class="tab" onclick="goTab('jobs')">📋 All Jobs</button>
+  <button class="tab" onclick="goTab('scan')">📸 Scan OTF</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="tab-dashboard">
+  <div class="stats" id="stats"></div>
+  <div class="sec">Recent Jobs</div>
+  <div class="jlist" id="recent"></div>
+</div>
+
+<!-- JOBS -->
+<div id="tab-jobs" class="hidden">
+  <div class="srow">
+    <input id="sq" placeholder="🔍  Search name, chassis, reg, item…" oninput="renderJobs()">
+    <select id="sf" onchange="renderJobs()">
+      <option value="">All Status</option>
+      <option value="pending">Pending</option>
+      <option value="in-progress">In Progress</option>
+      <option value="done">Done</option>
+    </select>
+    <button class="btn btn-primary" onclick="openNew()">+ Add</button>
+  </div>
+  <div class="jlist" id="jlist"></div>
+</div>
+
+<!-- SCAN -->
+<div id="tab-scan" class="hidden">
+  <div style="max-width:600px;margin:0 auto;">
+    <div class="sec">📸 Scan Handwritten OTF</div>
+    <p style="color:var(--muted);font-size:0.86rem;margin-bottom:16px;">Upload a photo — AI will extract all details automatically.</p>
+    <div class="scanbox" id="sdrop" onclick="document.getElementById('sfile').click()">
+      <div style="font-size:2.5rem;margin-bottom:10px;">📄</div>
+      <p style="color:var(--muted);">Tap to upload OTF photo (JPG/PNG)</p>
+    </div>
+    <input type="file" id="sfile" accept="image/*" class="hidden" onchange="handleScan(event)">
+    <img id="sprev" class="sprev hidden">
+    <div id="sstatus" class="hidden">
+      <div style="font-size:0.83rem;color:var(--blue);margin-bottom:6px;" id="stxt">Reading image…</div>
+      <div class="pbar"><div class="pfill" id="pfill"></div></div>
+    </div>
+    <div id="sresult" class="hidden">
+      <div class="sec">AI Extracted Data</div>
+      <div class="aout" id="aout"></div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="openScanned()">✅ Review & Save</button>
+        <button class="btn btn-secondary" onclick="resetScan()">🔄 Scan Another</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- JOB MODAL -->
+<div class="overlay hidden" id="jmodal">
+<div class="modal">
+  <button class="xbtn" onclick="closeM('jmodal')">×</button>
+  <h2 id="mtitle">NEW JOB</h2>
+  <input type="hidden" id="eid">
+  <div class="sec">Customer & Vehicle</div>
+  <div class="fg">
+    <div class="f"><label>Customer Name *</label><input id="fc" placeholder="e.g. Bijo Jose"></div>
+    <div class="f"><label>OTF Number</label><input id="fn" placeholder="e.g. 7370"></div>
+    <div class="f"><label>Outlet</label><input id="fo" placeholder="e.g. SDP Suja"></div>
+    <div class="f"><label>Date</label><input type="date" id="fd"></div>
+    <div class="f"><label>Reg No</label><input id="fr" placeholder="KL-05-AB-1234"></div>
+    <div class="f"><label>Chassis No</label><input id="fch" placeholder="e.g. T28 34797"></div>
+    <div class="f"><label>Engine No</label><input id="fen"></div>
+    <div class="f"><label>Vehicle Model</label><input id="fm" placeholder="e.g. Thar"></div>
+    <div class="f"><label>Delivery Date</label><input type="date" id="fdel"></div>
+    <div class="f"><label>Status</label>
+      <select id="fst"><option value="pending">Pending</option><option value="in-progress">In Progress</option><option value="done">Done</option></select>
+    </div>
+  </div>
+  <div class="f" style="margin-top:10px;"><label>Notes</label><textarea id="fnotes" rows="2" placeholder="Special instructions…"></textarea></div>
+  <div class="sec">Accessories / Items</div>
+  <table class="itable">
+    <thead><tr><th>Item</th><th>Part No.</th><th>Qty</th><th>CRP ₹</th><th>Done?</th><th></th></tr></thead>
+    <tbody id="itbody"></tbody>
+  </table>
+  <button class="btn btn-secondary btn-sm" onclick="addRow()">+ Add Item</button>
+  <div id="tot" style="margin-top:10px;text-align:right;font-family:'Rajdhani';font-size:1.1rem;color:var(--accent2);"></div>
+  <div class="mfoot">
+    <button class="btn btn-secondary" onclick="closeM('jmodal')">Cancel</button>
+    <button class="btn btn-primary" onclick="saveJob()">💾 Save</button>
+  </div>
+</div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="overlay hidden" id="vmodal">
+<div class="modal">
+  <button class="xbtn" onclick="closeM('vmodal')">×</button>
+  <div id="vcontent"></div>
+</div>
+</div>
+
+<script>
+// ─── APPS SCRIPT ─────────────────────────────────────────────────────────────
+const AS_CODE=`function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Jobs');
+  var jobs = [];
+  if (sheet) {
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][2]) { try { jobs.push(JSON.parse(rows[i][2])); } catch(x){} }
+    }
+  }
+  var out = JSON.stringify(jobs);
+  var cb = e && e.parameter && e.parameter.callback;
+  if (cb) return ContentService.createTextOutput(cb+'('+out+')').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  return ContentService.createTextOutput(out).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Jobs')
+    || SpreadsheetApp.getActiveSpreadsheet().insertSheet('Jobs');
+  var d = JSON.parse(e.postData.contents);
+  if (d.action === 'save') {
+    var rows = sheet.getDataRange().getValues();
+    var found = false;
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === d.job.id) {
+        sheet.getRange(i+1,1,1,3).setValues([[d.job.id,d.job.customer,JSON.stringify(d.job)]]);
+        found = true; break;
+      }
+    }
+    if (!found) sheet.appendRow([d.job.id, d.job.customer, JSON.stringify(d.job)]);
+  }
+  if (d.action === 'delete') {
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === d.id) { sheet.deleteRow(i+1); break; }
+    }
+  }
+  return ContentService.createTextOutput('ok').setMimeType(ContentService.MimeType.TEXT);
+}`;
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let jobs       = JSON.parse(localStorage.getItem('otf_jobs')||'[]');
+let scriptUrl  = localStorage.getItem('otf_script')||'';
+let sheetId    = localStorage.getItem('otf_sheetid')||'';
+let scanned    = null;
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+(function(){
+  if(scriptUrl&&sheetId){
+    document.getElementById('setup').classList.add('hidden');
+    setSS('syncing');
+    syncNow();
+  } else setSS('off');
+  renderDash();
+})();
+
+// ─── SYNC STATUS ─────────────────────────────────────────────────────────────
+function setSS(s){
+  const dot=document.getElementById('sdot'),lbl=document.getElementById('slbl');
+  dot.className='sync-dot'+(s==='ok'?' ok':s==='err'?' err':'');
+  lbl.textContent={ok:'Synced ✓',err:'Sync error – local only',syncing:'Syncing…',off:'Local only'}[s]||s;
+}
+
+// READ: use Google Sheets published CSV export — completely bypasses CORS
+async function syncNow(){
+  if(!sheetId){setSS('off');return;}
+  setSS('syncing');
+  // gviz/tq endpoint works cross-origin for publicly shared sheets
+  const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Jobs&t=${Date.now()}`;
+  try{
+    const r=await fetch(url);
+    if(!r.ok) throw new Error('Cannot read sheet. Make sure you shared it as "Anyone with the link – Viewer".');
+    const csv=await r.text();
+    const rows=parseCSV(csv);
+    const loaded=[];
+    for(let i=1;i<rows.length;i++){
+      const cell=rows[i]&&rows[i][2];
+      if(cell){try{loaded.push(JSON.parse(cell));}catch(x){}}
+    }
+    jobs=loaded;
+    localStorage.setItem('otf_jobs',JSON.stringify(jobs));
+    setSS('ok'); renderDash(); renderJobs();
+    toast('☁️ Synced!');
+  }catch(e){
+    setSS('err');
+    toast('⚠️ '+e.message,'var(--yellow)');
+  }
+}
+
+function parseCSV(text){
+  const rows=[];
+  // Split by lines but respect quoted newlines
+  const lines=text.replace(/\r/g,'').split('\n');
+  for(const line of lines){
+    if(!line.trim())continue;
+    const row=[];let inQ=false,cur='';
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+      else if(ch===','&&!inQ){row.push(cur);cur='';}
+      else cur+=ch;
+    }
+    row.push(cur);rows.push(row);
+  }
+  return rows;
+}
+
+// WRITE: no-cors POST to Apps Script (opaque response is fine — we re-read via CSV)
+function pushJob(job){
+  if(!scriptUrl)return;
+  fetch(scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'save',job})})
+    .then(()=>setTimeout(syncNow,2500)).catch(()=>{});
+}
+
+function remoteDelete(id){
+  if(!scriptUrl)return;
+  fetch(scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'delete',id})})
+    .then(()=>setTimeout(syncNow,2500)).catch(()=>{});
+}
+
+// ─── SETUP ───────────────────────────────────────────────────────────────────
+function copyScript(){
+  navigator.clipboard.writeText(AS_CODE).then(()=>{
+    const el=document.getElementById('cok');el.classList.remove('hidden');
+    setTimeout(()=>el.classList.add('hidden'),3000);
+  }).catch(()=>prompt('Copy this script:',AS_CODE));
+}
+
+function extractId(url){
+  const m=url.match(/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  return m?m[1]:null;
+}
+
+function connectSheet(){
+  const su=document.getElementById('inp-script').value.trim();
+  const sh=document.getElementById('inp-sheet').value.trim();
+  if(!su.includes('script.google.com')){
+    alert('Please paste the Apps Script Web App URL in step 3.\nIt should start with:\nhttps://script.google.com/macros/s/');return;
+  }
+  const sid=extractId(sh);
+  if(!sid){
+    alert('Please paste your Google Sheet URL in step 4.\nIt should look like:\nhttps://docs.google.com/spreadsheets/d/...');return;
+  }
+  scriptUrl=su;sheetId=sid;
+  localStorage.setItem('otf_script',su);
+  localStorage.setItem('otf_sheetid',sid);
+  document.getElementById('setup').classList.add('hidden');
+  setSS('syncing');syncNow();
+  toast('🔗 Connected!');
+}
+
+function skipSetup(){document.getElementById('setup').classList.add('hidden');}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function goTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['dashboard','jobs','scan'][i]===name));
+  ['dashboard','jobs','scan'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
+  if(name==='dashboard')renderDash();
+  if(name==='jobs')renderJobs();
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+function renderDash(){
+  const t=jobs.length,p=jobs.filter(j=>j.status==='pending').length,
+        ip=jobs.filter(j=>j.status==='in-progress').length,d=jobs.filter(j=>j.status==='done').length;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat-card all"><div class="num">${t}</div><div class="lbl">Total</div></div>
+    <div class="stat-card pend"><div class="num">${p}</div><div class="lbl">Pending</div></div>
+    <div class="stat-card prog"><div class="num">${ip}</div><div class="lbl">In Progress</div></div>
+    <div class="stat-card done"><div class="num">${d}</div><div class="lbl">Done</div></div>`;
+  const rs=[...jobs].reverse().slice(0,5);
+  document.getElementById('recent').innerHTML=rs.length?rs.map(jcard).join(''):`<div class="empty"><div style="font-size:3rem">📭</div><p style="margin-top:14px">No jobs yet.</p></div>`;
+}
+
+// ─── JOBS ────────────────────────────────────────────────────────────────────
+function renderJobs(){
+  const q=(document.getElementById('sq')||{value:''}).value.toLowerCase();
+  const st=(document.getElementById('sf')||{value:''}).value;
+  let f=jobs.filter(j=>{
+    const txt=[j.customer,j.chassis,j.reg,j.model,j.otf,...(j.items||[]).map(i=>i.desc+' '+i.part)].join(' ').toLowerCase();
+    return(!q||txt.includes(q))&&(!st||j.status===st);
+  });
+  f=[...f].reverse();
+  const c=document.getElementById('jlist');if(!c)return;
+  c.innerHTML=f.length?f.map(jcard).join(''):`<div class="empty"><div style="font-size:3rem">🔍</div><p style="margin-top:14px">No jobs found.</p></div>`;
+}
+
+function jcard(j){
+  const items=(j.items||[]).filter(i=>i.desc);
+  const total=(j.items||[]).reduce((s,i)=>s+(parseFloat(i.crp)||0)*(parseInt(i.qty)||1),0);
+  const sl={pending:'Pending','in-progress':'In Progress',done:'Done'};
+  return`<div class="jcard s-${j.status}" onclick="viewJob('${j.id}')">
+    <div class="jhead">
+      <div>
+        <div class="jtitle">${j.customer||'Unknown'} <span style="font-size:0.82rem;color:var(--muted)">#${j.otf||'—'}</span></div>
+        <div class="jmeta">
+          ${j.model?`<span class="mi">🚗 <strong>${j.model}</strong></span>`:''}
+          ${j.chassis?`<span class="mi">🔩 ${j.chassis}</span>`:''}
+          ${j.reg?`<span class="mi">🪪 ${j.reg}</span>`:''}
+          ${j.date?`<span class="mi">📅 ${j.date}</span>`:''}
+          ${total?`<span class="mi">₹ <strong>${total.toLocaleString('en-IN')}</strong></span>`:''}
+        </div>
+      </div>
+      <span class="badge b-${j.status}">${sl[j.status]||j.status}</span>
+    </div>
+    ${items.length?`<div class="chips">${items.slice(0,5).map(i=>`<span class="chip">${i.desc}</span>`).join('')}${items.length>5?`<span class="chip">+${items.length-5}</span>`:''}</div>`:''}
+    <div class="jact" onclick="event.stopPropagation()">
+      <button class="btn btn-secondary btn-sm" onclick="editJob('${j.id}')">✏️ Edit</button>
+      ${j.status!=='done'?`<button class="btn btn-success btn-sm" onclick="setStatus('${j.id}','done')">✅ Done</button>`:''}
+      ${j.status==='pending'?`<button class="btn btn-blue btn-sm" onclick="setStatus('${j.id}','in-progress')">🔧 Start</button>`:''}
+      <button class="btn btn-danger btn-sm" onclick="delJob('${j.id}')">🗑️</button>
+    </div>
+  </div>`;
+}
+
+// ─── VIEW ────────────────────────────────────────────────────────────────────
+function viewJob(id){
+  const j=jobs.find(x=>x.id===id);if(!j)return;
+  const items=(j.items||[]).filter(i=>i.desc);
+  const total=items.reduce((s,i)=>s+(parseFloat(i.crp)||0)*(parseInt(i.qty)||1),0);
+  const sl={pending:'Pending','in-progress':'In Progress',done:'Done'};
+  document.getElementById('vcontent').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <div>
+        <h2 style="font-family:'Rajdhani';font-size:1.5rem;">${j.customer||'—'}</h2>
+        <div style="color:var(--muted);font-size:0.8rem;">OTF #${j.otf||'—'} · ${j.outlet||''} · ${j.date||''}</div>
+      </div>
+      <span class="badge b-${j.status}" style="font-size:0.78rem;padding:5px 14px">${sl[j.status]||j.status}</span>
+    </div>
+    <div class="fg" style="margin-bottom:16px;">
+      ${[['Model',j.model],['Chassis',j.chassis],['Reg No',j.reg],['Engine',j.engine],['Delivery',j.delivery]].map(([l,v])=>
+        `<div><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase">${l}</div><div>${v||'—'}</div></div>`).join('')}
+    </div>
+    ${j.notes?`<div style="background:var(--bg);border-radius:8px;padding:10px;font-size:0.83rem;color:var(--muted);margin-bottom:14px;">📝 ${j.notes}</div>`:''}
+    ${items.length?`<div class="sec">Accessories</div>
+    <table class="dtable"><thead><tr><th>#</th><th>Item</th><th>Part No</th><th>Qty</th><th>CRP ₹</th><th>Total</th></tr></thead><tbody>
+      ${items.map((i,n)=>`<tr><td>${n+1}</td><td>${i.desc}</td><td style="color:var(--muted)">${i.part||'—'}</td><td>${i.qty||1}</td><td>${i.crp||'—'}</td><td>${((parseFloat(i.crp)||0)*(parseInt(i.qty)||1)).toLocaleString('en-IN')}</td></tr>`).join('')}
+      <tr class="trow"><td colspan="5" style="text-align:right">TOTAL</td><td>₹ ${total.toLocaleString('en-IN')}</td></tr>
+    </tbody></table>`:''}
+    <div class="mfoot">
+      <button class="btn btn-secondary" onclick="closeM('vmodal')">Close</button>
+      <button class="btn btn-primary" onclick="closeM('vmodal');editJob('${j.id}')">✏️ Edit</button>
+    </div>`;
+  openM('vmodal');
+}
+
+// ─── STATUS ──────────────────────────────────────────────────────────────────
+function setStatus(id,status){
+  const j=jobs.find(x=>x.id===id);if(!j)return;
+  j.status=status;
+  localStorage.setItem('otf_jobs',JSON.stringify(jobs));
+  pushJob(j);
+  toast(status==='done'?'✅ Done!':'🔧 Started!',status==='done'?'var(--green)':'var(--accent2)');
+  renderDash();renderJobs();
+}
+
+function delJob(id){
+  if(!confirm('Delete this job?'))return;
+  jobs=jobs.filter(x=>x.id!==id);
+  localStorage.setItem('otf_jobs',JSON.stringify(jobs));
+  remoteDelete(id);
+  toast('🗑️ Deleted','var(--red)');
+  renderDash();renderJobs();
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+function openM(id){document.getElementById(id).classList.remove('hidden');}
+function closeM(id){document.getElementById(id).classList.add('hidden');}
+
+function openNew(pre){
+  document.getElementById('mtitle').textContent='NEW JOB';
+  document.getElementById('eid').value='';
+  clearForm();
+  if(pre)applyPre(pre);
+  if(!(pre&&(pre.items||[]).length))addRow();
+  updTot();openM('jmodal');
+}
+
+function editJob(id){
+  const j=jobs.find(x=>x.id===id);if(!j)return;
+  document.getElementById('mtitle').textContent='EDIT JOB';
+  document.getElementById('eid').value=id;
+  const m={customer:'fc',otf:'fn',outlet:'fo',date:'fd',reg:'fr',chassis:'fch',engine:'fen',model:'fm',delivery:'fdel',status:'fst',notes:'fnotes'};
+  Object.entries(m).forEach(([k,i])=>document.getElementById(i).value=j[k]||'');
+  document.getElementById('itbody').innerHTML='';
+  (j.items||[]).forEach(i=>addRow(i));
+  if(!(j.items||[]).length)addRow();
+  updTot();openM('jmodal');
+}
+
+function clearForm(){
+  ['fc','fn','fo','fd','fr','fch','fen','fm','fdel','fnotes'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('fst').value='pending';
+  document.getElementById('itbody').innerHTML='';
+}
+
+function applyPre(p){
+  const m={customer:'fc',otf:'fn',outlet:'fo',date:'fd',reg:'fr',chassis:'fch',engine:'fen',model:'fm',delivery:'fdel',notes:'fnotes'};
+  Object.entries(m).forEach(([k,i])=>{if(p[k])document.getElementById(i).value=p[k];});
+  document.getElementById('itbody').innerHTML='';
+  (p.items||[]).forEach(i=>addRow(i));
+}
+
+function addRow(it){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td><input type="text" placeholder="e.g. Mud Flap" value="${(it&&it.desc)||''}" oninput="updTot()"></td>
+    <td><input type="text" placeholder="Part no." value="${(it&&it.part)||''}"></td>
+    <td><input type="number" min="1" value="${(it&&it.qty)||1}" style="width:50px" oninput="updTot()"></td>
+    <td><input type="number" min="0" value="${(it&&it.crp)||''}" oninput="updTot()"></td>
+    <td><select style="width:70px"><option value="pending" ${(!it||it.status==='pending')?'selected':''}>⏳</option><option value="done" ${(it&&it.status==='done')?'selected':''}>✅</option></select></td>
+    <td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();updTot()">×</button></td>`;
+  document.getElementById('itbody').appendChild(tr);updTot();
+}
+
+function updTot(){
+  let t=0;
+  document.querySelectorAll('#itbody tr').forEach(tr=>{
+    const inp=tr.querySelectorAll('input');
+    t+=(parseFloat(inp[3].value)||0)*(parseInt(inp[2].value)||1);
+  });
+  document.getElementById('tot').textContent=t?`Total: ₹ ${t.toLocaleString('en-IN')}`:'' ;
+}
+
+function saveJob(){
+  const c=document.getElementById('fc').value.trim();
+  if(!c){alert('Customer name is required!');return;}
+  const items=[];
+  document.querySelectorAll('#itbody tr').forEach(tr=>{
+    const inp=tr.querySelectorAll('input'),sel=tr.querySelector('select');
+    items.push({desc:inp[0].value.trim(),part:inp[1].value.trim(),qty:inp[2].value||1,crp:inp[3].value,status:sel.value});
+  });
+  const eid=document.getElementById('eid').value;
+  const job={
+    id:eid||gid(),customer:c,
+    otf:document.getElementById('fn').value,
+    outlet:document.getElementById('fo').value,
+    date:document.getElementById('fd').value,
+    reg:document.getElementById('fr').value,
+    chassis:document.getElementById('fch').value,
+    engine:document.getElementById('fen').value,
+    model:document.getElementById('fm').value,
+    delivery:document.getElementById('fdel').value,
+    status:document.getElementById('fst').value,
+    notes:document.getElementById('fnotes').value,
+    items
+  };
+  if(eid){const idx=jobs.findIndex(x=>x.id===eid);jobs[idx]=job;toast('✏️ Updated!');}
+  else{jobs.push(job);toast('✅ Saved!');}
+  localStorage.setItem('otf_jobs',JSON.stringify(jobs));
+  pushJob(job);
+  closeM('jmodal');renderDash();renderJobs();
+}
+
+// ─── SCAN ────────────────────────────────────────────────────────────────────
+function handleScan(e){const f=e.target.files[0];if(f)doScan(f);}
+
+function doScan(file){
+  const r=new FileReader();
+  r.onload=e=>{
+    document.getElementById('sprev').src=e.target.result;
+    document.getElementById('sprev').classList.remove('hidden');
+    document.getElementById('sdrop').classList.add('hidden');
+    runAI(e.target.result);
+  };
+  r.readAsDataURL(file);
+}
+
+async function runAI(dataUrl){
+  document.getElementById('sstatus').classList.remove('hidden');
+  document.getElementById('sresult').classList.add('hidden');
+  animProg();
+  const b64=dataUrl.split(',')[1];
+  const mt=(dataUrl.match(/data:([^;]+)/)||[])[1]||'image/jpeg';
+  const prompt=`You are an OCR assistant for a Mahindra dealership. Extract ALL data from this handwritten Order Taking Form.
+Return ONLY valid JSON, no extra text:
+{"customer":"name","otf":"form number","outlet":"branch","date":"YYYY-MM-DD","reg":"reg no","chassis":"chassis no","engine":"engine no","model":"vehicle model","delivery":"YYYY-MM-DD","notes":"notes","items":[{"desc":"item","part":"part no","qty":1,"crp":0}]}`;
+  try{
+    const res=await fetch('https://otf-proxy.vivinrichardk.workers.dev',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+          {type:'text',text:prompt}
+        ]}]
+      })
+    });
+    const d=await res.json();
+    const txt=(d.content||[]).map(c=>c.text||'').join('');
+    document.getElementById('aout').textContent=txt;
+    try{scanned=JSON.parse(txt.replace(/```json|```/g,'').trim());}catch{scanned=null;}
+    document.getElementById('sstatus').classList.add('hidden');
+    document.getElementById('sresult').classList.remove('hidden');
+  }catch(err){
+    document.getElementById('stxt').textContent='Could not scan. Fill in manually.';
+    document.getElementById('sresult').classList.remove('hidden');
+    document.getElementById('sstatus').classList.add('hidden');
+    document.getElementById('aout').textContent=err.message;
+    scanned=null;
+  }
+}
+
+function animProg(){
+  const b=document.getElementById('pfill');let w=0;
+  const t=setInterval(()=>{w+=Math.random()*9;if(w>90){clearInterval(t);return;}b.style.width=w+'%';},300);
+}
+
+function openScanned(){
+  if(scanned){
+    if(scanned.date)scanned.date=scanned.date.replace(/(\d{2})\/(\d{2})\/(\d{2,4})/,(_,d,m,y)=>`${y.length===2?'20'+y:y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
+    openNew(scanned);
+  }else openNew();
+  goTab('jobs');
+}
+
+function resetScan(){
+  document.getElementById('sprev').classList.add('hidden');
+  document.getElementById('sdrop').classList.remove('hidden');
+  document.getElementById('sstatus').classList.add('hidden');
+  document.getElementById('sresult').classList.add('hidden');
+  document.getElementById('sfile').value='';
+  document.getElementById('pfill').style.width='0';
+  scanned=null;
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+
+function toast(msg,color='var(--green)'){
+  const el=document.createElement('div');
+  el.className='toast';el.textContent=msg;el.style.borderLeftColor=color;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),3000);
+}
+
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeM(o.id);}));
+
+const sd=document.getElementById('sdrop');
+sd.addEventListener('dragover',e=>{e.preventDefault();sd.style.borderColor='var(--blue)';});
+sd.addEventListener('dragleave',()=>sd.style.borderColor='');
+sd.addEventListener('drop',e=>{e.preventDefault();sd.style.borderColor='';const f=e.dataTransfer.files[0];if(f)doScan(f);});
+</script>
+</body>
+</html>
