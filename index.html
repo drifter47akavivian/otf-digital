@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTF Manager – Vayalat Mahindra</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d1117;--surface:#161b22;--surface2:#1c2230;
+    --border:#2a3342;--accent:#e63946;--accent2:#f4a261;
+    --text:#e6edf3;--muted:#8b949e;
+    --green:#2ea043;--yellow:#d29922;--blue:#388bfd;--red:#e63946;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  header{background:var(--surface);border-bottom:2px solid var(--accent);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  header h1{font-family:'Rajdhani',sans-serif;font-size:1.6rem;font-weight:700;letter-spacing:2px;}
+  header h1 span{color:var(--accent);}
+  .header-sub{font-size:0.72rem;color:var(--muted);letter-spacing:1px;}
+  .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:5px;}
+  .sync-dot.ok{background:var(--green);animation:pulse 2s infinite;}
+  .sync-dot.err{background:var(--red);}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  .main{max-width:1200px;margin:0 auto;padding:24px 16px;}
+  .tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface);border-radius:10px;padding:6px;}
+  .tab{flex:1;padding:10px 8px;background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:0.9rem;font-weight:600;letter-spacing:1px;cursor:pointer;border-radius:7px;transition:all 0.2s;}
+  .tab.active{background:var(--accent);color:#fff;}
+  .tab:hover:not(.active){background:var(--border);color:var(--text);}
+  .setup-panel{background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:24px;margin-bottom:24px;}
+  .setup-panel h2{font-family:'Rajdhani',sans-serif;font-size:1.3rem;color:var(--accent);margin-bottom:6px;}
+  .setup-steps{margin:16px 0;}
+  .step{display:flex;gap:14px;margin-bottom:16px;align-items:flex-start;}
+  .step-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .step-body{font-size:0.87rem;color:var(--muted);line-height:1.7;}
+  .step-body strong{color:var(--text);}
+  .step-body a{color:var(--blue);}
+  .url-input-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+  .url-input-row input{flex:1;min-width:240px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:0.88rem;outline:none;transition:border 0.2s;}
+  .url-input-row input:focus{border-color:var(--accent);}
+  .btn{padding:10px 18px;border-radius:8px;border:none;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:0.88rem;letter-spacing:1px;cursor:pointer;transition:all 0.2s;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#c1121f;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-secondary:hover{border-color:var(--accent);}
+  .btn-sm{padding:5px 10px;font-size:0.78rem;}
+  .btn-danger{background:var(--red);color:#fff;}
+  .btn-success{background:var(--green);color:#fff;}
+  .btn-scan{background:#0d2233;color:#60d0f0;border:1px solid #1e6a8a;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+  .stat-card .num{font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;}
+  .stat-card .lbl{font-size:0.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+  .stat-card.all .num{color:var(--blue);}
+  .stat-card.pending .num{color:var(--yellow);}
+  .stat-card.progress .num{color:var(--accent2);}
+  .stat-card.done .num{color:var(--green);}
+  .section-title{font-family:'Rajdhani',sans-serif;font-size:0.95rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+  .search-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+  .search-row input,.search-row select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:0.88rem;outline:none;transition:border 0.2s;}
+  .search-row input{flex:1;min-width:200px;}
+  .search-row input:focus,.search-row select:focus{border-color:var(--accent);}
+  .jobs-list{display:flex;flex-direction:column;gap:12px;}
+  .job-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s;border-left:4px solid var(--border);}
+  .job-card:hover{border-color:var(--accent);transform:translateY(-1px);}
+  .job-card.status-pending{border-left-color:var(--yellow);}
+  .job-card.status-in-progress{border-left-color:var(--accent2);}
+  .job-card.status-done{border-left-color:var(--green);}
+  .job-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .job-title{font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;}
+  .job-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+  .meta-item{font-size:0.76rem;color:var(--muted);}
+  .meta-item strong{color:var(--text);}
+  .badge{padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+  .badge-pending{background:#3a2a00;color:var(--yellow);}
+  .badge-in-progress{background:#3a2000;color:var(--accent2);}
+  .badge-done{background:#0a2a0a;color:var(--green);}
+  .job-items{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;}
+  .item-chip{background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:20px;font-size:0.72rem;color:var(--muted);}
+  .job-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+  .empty{text-align:center;padding:60px 20px;color:var(--muted);}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:flex-start;justify-content:center;z-index:999;padding:20px;overflow-y:auto;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:700px;padding:24px;position:relative;margin:auto;}
+  .modal h2{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:20px;color:var(--accent);}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  .form-group label{font-size:0.75rem;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
+  .form-group input,.form-group select,.form-group textarea{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:0.88rem;outline:none;transition:border 0.2s;font-family:'DM Sans',sans-serif;}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
+  .items-table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+  .items-table th{font-size:0.72rem;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);}
+  .items-table td{padding:4px 5px;}
+  .items-table input,.items-table select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:6px;font-size:0.8rem;width:100%;outline:none;font-family:'DM Sans',sans-serif;}
+  .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;}
+  .close-btn{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;}
+  .close-btn:hover{color:var(--text);}
+  .detail-items{width:100%;border-collapse:collapse;}
+  .detail-items th,.detail-items td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);font-size:0.83rem;}
+  .detail-items th{color:var(--muted);font-size:0.72rem;text-transform:uppercase;}
+  .total-row{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;color:var(--accent2);}
+  .scan-box{background:var(--bg);border:2px dashed var(--border);border-radius:12px;padding:30px;text-align:center;cursor:pointer;transition:border 0.2s;margin-bottom:16px;}
+  .scan-box:hover{border-color:var(--blue);}
+  .scan-preview{width:100%;max-height:200px;object-fit:contain;border-radius:8px;margin-bottom:12px;}
+  .ai-output{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:0.82rem;color:var(--muted);max-height:150px;overflow-y:auto;font-family:monospace;white-space:pre-wrap;}
+  .progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin:8px 0;}
+  .progress-fill{height:100%;background:var(--accent);width:0%;transition:width 0.4s;}
+  .hidden{display:none!important;}
+  .toast{position:fixed;bottom:20px;right:20px;background:var(--surface2);border:1px solid var(--border);padding:12px 18px;border-radius:8px;font-size:0.85rem;z-index:9999;animation:slideIn 0.3s ease;border-left:3px solid var(--green);}
+  @keyframes slideIn{from{transform:translateX(100px);opacity:0}to{transform:none;opacity:1}}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .code-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:monospace;font-size:0.78rem;color:var(--accent2);max-height:160px;overflow-y:auto;white-space:pre;margin-top:10px;}
+  @media(max-width:600px){.form-grid{grid-template-columns:1fr;}.tabs .tab{font-size:0.72rem;padding:8px 4px;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>OTF <span>MANAGER</span></h1>
+    <div class="header-sub">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-label">Not connected</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="btn btn-secondary btn-sm" onclick="syncNow()">🔄 Sync</button>
+    <button class="btn btn-primary" onclick="openNewJobModal()">+ NEW JOB</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- SETUP PANEL -->
+  <div class="setup-panel" id="setup-panel">
+    <h2>☁️ Connect to Google Sheets — One-time Setup</h2>
+    <p style="color:var(--muted);font-size:0.86rem;margin-bottom:4px;">Sync jobs across all your devices for free. Follow these steps once:</p>
+    <div class="setup-steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          Go to <a href="https://sheets.new" target="_blank">sheets.new</a> to create a new Google Sheet. Name it <strong>OTF Jobs</strong>.
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          In the sheet, click <strong>Extensions → Apps Script</strong>. Delete all existing code. Click the button below to copy the script, then paste it in. Click <strong>💾 Save</strong>.
+          <div style="margin-top:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="copyScript()">📋 Copy Apps Script Code</button>
+            <span id="copy-ok" style="font-size:0.78rem;color:var(--green);margin-left:8px;" class="hidden">✓ Copied!</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          In Apps Script, click <strong>Deploy → New deployment</strong>.<br>
+          Set type to <strong>Web app</strong>. Set <em>"Execute as"</em> to <strong>Me</strong>. Set <em>"Who has access"</em> to <strong>Anyone</strong>.<br>
+          Click <strong>Deploy</strong> → allow permissions → copy the <strong>Web app URL</strong>.
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          Paste the Web App URL below and click Connect:
+          <div class="url-input-row">
+            <input type="text" id="sheet-url" placeholder="https://script.google.com/macros/s/...">
+            <button class="btn btn-primary" onclick="connectSheet()">🔗 Connect</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <p style="font-size:0.78rem;color:var(--muted);">
+      💡 Works without Google Sheets too — data saves on this device only.
+      <button class="btn btn-secondary btn-sm" style="margin-left:8px;" onclick="skipSetup()">Skip for now</button>
+    </p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+    <button class="tab" onclick="switchTab('jobs')">📋 All Jobs</button>
+    <button class="tab" onclick="switchTab('scan')">📸 Scan OTF</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="tab-dashboard">
+    <div class="stats" id="stats-cards"></div>
+    <div class="section-title">Recent Jobs</div>
+    <div class="jobs-list" id="recent-jobs"></div>
+  </div>
+
+  <!-- JOBS -->
+  <div id="tab-jobs" class="hidden">
+    <div class="search-row">
+      <input type="text" id="search-input" placeholder="🔍  Search name, chassis, reg, item..." oninput="renderJobs()">
+      <select id="filter-status" onchange="renderJobs()">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="done">Done</option>
+      </select>
+      <button class="btn btn-primary" onclick="openNewJobModal()">+ Add Job</button>
+    </div>
+    <div class="jobs-list" id="jobs-list"></div>
+  </div>
+
+  <!-- SCAN -->
+  <div id="tab-scan" class="hidden">
+    <div style="max-width:620px;margin:0 auto;">
+      <div class="section-title">📸 SCAN ORDER TAKING FORM</div>
+      <p style="color:var(--muted);font-size:0.86rem;margin-bottom:16px;">Upload a photo of a handwritten OTF. AI will read and fill in the form automatically.</p>
+      <div class="scan-box" id="scan-drop" onclick="document.getElementById('scan-file').click()">
+        <div style="font-size:2.5rem;margin-bottom:10px;">📄</div>
+        <p style="color:var(--muted);">Tap to upload OTF photo</p>
+        <p style="font-size:0.75rem;color:var(--muted);margin-top:6px;">JPG or PNG</p>
+      </div>
+      <input type="file" id="scan-file" accept="image/*" class="hidden" onchange="handleScanFile(event)">
+      <img id="scan-preview" class="scan-preview hidden">
+      <div id="scan-status" class="hidden">
+        <div style="font-size:0.83rem;color:var(--blue);margin-bottom:6px;" id="scan-status-text">Reading image...</div>
+        <div class="progress-bar"><div class="progress-fill" id="scan-progress"></div></div>
+      </div>
+      <div id="scan-result-box" class="hidden">
+        <div class="section-title">AI EXTRACTED DATA</div>
+        <div class="ai-output" id="ai-raw-output"></div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="openScannedForm()">✅ Review & Save</button>
+          <button class="btn btn-secondary" onclick="resetScan()">🔄 Scan Another</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JOB MODAL -->
+<div class="modal-overlay hidden" id="job-modal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('job-modal')">×</button>
+    <h2 id="modal-title">NEW JOB</h2>
+    <input type="hidden" id="edit-id">
+    <div class="section-title">Customer & Vehicle</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Customer Name *</label><input type="text" id="f-customer" placeholder="e.g. Bijo Jose"></div>
+      <div class="form-group"><label>OTF Number</label><input type="text" id="f-otf" placeholder="e.g. 7370"></div>
+      <div class="form-group"><label>Outlet</label><input type="text" id="f-outlet" placeholder="e.g. SDP Suja"></div>
+      <div class="form-group"><label>Date</label><input type="date" id="f-date"></div>
+      <div class="form-group"><label>Reg No</label><input type="text" id="f-reg" placeholder="KL-05-AB-1234"></div>
+      <div class="form-group"><label>Chassis No</label><input type="text" id="f-chassis" placeholder="e.g. T28 34797"></div>
+      <div class="form-group"><label>Engine No</label><input type="text" id="f-engine"></div>
+      <div class="form-group"><label>Vehicle Model</label><input type="text" id="f-model" placeholder="e.g. Thar, Scorpio-N"></div>
+      <div class="form-group"><label>Delivery Date</label><input type="date" id="f-delivery"></div>
+      <div class="form-group"><label>Status</label>
+        <select id="f-status">
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:10px;"><label>Notes</label><textarea id="f-notes" rows="2" placeholder="Special instructions..."></textarea></div>
+    <div class="section-title">Accessories / Items</div>
+    <table class="items-table">
+      <thead><tr><th>Item Description</th><th>Part Number</th><th>Qty</th><th>CRP (₹)</th><th>Done?</th><th></th></tr></thead>
+      <tbody id="items-body"></tbody>
+    </table>
+    <button class="btn btn-secondary btn-sm" onclick="addItemRow()">+ Add Item</button>
+    <div id="total-display" style="margin-top:10px;text-align:right;font-family:'Rajdhani';font-size:1.1rem;color:var(--accent2);"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('job-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveJob()">💾 Save Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="modal-overlay hidden" id="view-modal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('view-modal')">×</button>
+    <div id="view-content"></div>
+  </div>
+</div>
+
+<script>
+// ── APPS SCRIPT (for Google Sheets) ──────────────────────────────────────────
+// Key fix: doGet/doPost must return ContentService with proper CORS headers
+// We use JSONP (callback param) to bypass CORS from the browser side
+const APPS_SCRIPT = `function doGet(e) {
+  var cb = e && e.parameter && e.parameter.callback;
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Jobs');
+  var jobs = [];
+  if (sheet) {
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][2]) {
+        try { jobs.push(JSON.parse(rows[i][2])); } catch(err) {}
+      }
+    }
+  }
+  var json = JSON.stringify(jobs);
+  if (cb) {
+    return ContentService.createTextOutput(cb + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Jobs')
+    || SpreadsheetApp.getActiveSpreadsheet().insertSheet('Jobs');
+  var data = JSON.parse(e.postData.contents);
+
+  if (data.action === 'save') {
+    var rows = sheet.getDataRange().getValues();
+    var found = false;
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === data.job.id) {
+        sheet.getRange(i+1,1,1,3).setValues([[data.job.id, data.job.customer, JSON.stringify(data.job)]]);
+        found = true; break;
+      }
+    }
+    if (!found) sheet.appendRow([data.job.id, data.job.customer, JSON.stringify(data.job)]);
+  }
+
+  if (data.action === 'delete') {
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === data.id) { sheet.deleteRow(i+1); break; }
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ok:true}))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let jobs = JSON.parse(localStorage.getItem('otf_jobs') || '[]');
+let sheetUrl = localStorage.getItem('otf_sheet_url') || '';
+let scannedData = null;
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+if (sheetUrl) {
+  document.getElementById('setup-panel').classList.add('hidden');
+  document.getElementById('sheet-url').value = sheetUrl;
+  updateSyncStatus('connecting');
+  syncNow();
+} else {
+  updateSyncStatus('offline');
+}
+renderDashboard();
+
+// ── SYNC via JSONP (bypasses CORS) ────────────────────────────────────────────
+function updateSyncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot';
+  if (state === 'ok') { dot.classList.add('ok'); lbl.textContent = 'Synced ✓'; }
+  else if (state === 'err') { dot.classList.add('err'); lbl.textContent = 'Sync error – local only'; }
+  else if (state === 'connecting') { lbl.textContent = 'Connecting...'; }
+  else { lbl.textContent = 'Local only'; }
+}
+
+function jsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'otfcb_' + Date.now();
+    const script = document.createElement('script');
+    const timeout = setTimeout(() => {
+      cleanup(); reject(new Error('Timeout'));
+    }, 10000);
+    window[cbName] = (data) => { cleanup(); resolve(data); };
+    function cleanup() { clearTimeout(timeout); delete window[cbName]; if(script.parentNode) script.parentNode.removeChild(script); }
+    script.onerror = () => { cleanup(); reject(new Error('Script load error')); };
+    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
+    document.head.appendChild(script);
+  });
+}
+
+async function syncNow() {
+  if (!sheetUrl) return;
+  try {
+    const data = await jsonp(sheetUrl);
+    if (Array.isArray(data)) {
+      jobs = data;
+      localStorage.setItem('otf_jobs', JSON.stringify(jobs));
+      updateSyncStatus('ok');
+      toast('☁️ Synced!');
+      renderDashboard(); renderJobs();
+    }
+  } catch(e) {
+    updateSyncStatus('err');
+    toast('⚠️ Sync failed. Using local data.', 'var(--yellow)');
+  }
+}
+
+// POST to Apps Script via no-cors (fire and forget, then re-sync)
+async function pushJob(job) {
+  if (!sheetUrl) return;
+  try {
+    await fetch(sheetUrl, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'save', job })
+    });
+    setTimeout(syncNow, 1500);
+  } catch {}
+}
+
+async function deleteJobRemote(id) {
+  if (!sheetUrl) return;
+  try {
+    await fetch(sheetUrl, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'delete', id })
+    });
+    setTimeout(syncNow, 1500);
+  } catch {}
+}
+
+// ── SETUP ─────────────────────────────────────────────────────────────────────
+function copyScript() {
+  navigator.clipboard.writeText(APPS_SCRIPT).then(() => {
+    const el = document.getElementById('copy-ok');
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 3000);
+  }).catch(() => {
+    prompt('Copy this script:', APPS_SCRIPT);
+  });
+}
+
+function connectSheet() {
+  const url = document.getElementById('sheet-url').value.trim();
+  if (!url.includes('script.google.com')) {
+    alert('Please paste the correct Google Apps Script Web App URL.\nIt should look like:\nhttps://script.google.com/macros/s/.../exec');
+    return;
+  }
+  sheetUrl = url;
+  localStorage.setItem('otf_sheet_url', url);
+  document.getElementById('setup-panel').classList.add('hidden');
+  updateSyncStatus('connecting');
+  syncNow();
+  toast('🔗 Connecting...');
+}
+
+function skipSetup() {
+  document.getElementById('setup-panel').classList.add('hidden');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) =>
+    t.classList.toggle('active', ['dashboard','jobs','scan'][i] === name));
+  ['dashboard','jobs','scan'].forEach(t =>
+    document.getElementById('tab-'+t).classList.toggle('hidden', t !== name));
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'jobs') renderJobs();
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const total=jobs.length, p=jobs.filter(j=>j.status==='pending').length,
+        ip=jobs.filter(j=>j.status==='in-progress').length, d=jobs.filter(j=>j.status==='done').length;
+  document.getElementById('stats-cards').innerHTML=`
+    <div class="stat-card all"><div class="num">${total}</div><div class="lbl">Total</div></div>
+    <div class="stat-card pending"><div class="num">${p}</div><div class="lbl">Pending</div></div>
+    <div class="stat-card progress"><div class="num">${ip}</div><div class="lbl">In Progress</div></div>
+    <div class="stat-card done"><div class="num">${d}</div><div class="lbl">Done</div></div>`;
+  const r = [...jobs].reverse().slice(0,5);
+  const c = document.getElementById('recent-jobs');
+  c.innerHTML = r.length ? r.map(jobCardHTML).join('') : '<div class="empty"><div style="font-size:3rem">📭</div><p style="margin-top:14px">No jobs yet.</p></div>';
+}
+
+// ── JOBS ──────────────────────────────────────────────────────────────────────
+function renderJobs() {
+  const q = (document.getElementById('search-input')||{value:''}).value.toLowerCase();
+  const st = (document.getElementById('filter-status')||{value:''}).value;
+  let f = jobs.filter(j => {
+    const txt = [j.customer,j.chassis,j.reg,j.model,j.otf,...(j.items||[]).map(i=>i.desc+' '+i.part)].join(' ').toLowerCase();
+    return (!q||txt.includes(q)) && (!st||j.status===st);
+  });
+  f = [...f].reverse();
+  const c = document.getElementById('jobs-list'); if (!c) return;
+  c.innerHTML = f.length ? f.map(jobCardHTML).join('') : '<div class="empty"><div style="font-size:3rem">🔍</div><p style="margin-top:14px">No jobs found.</p></div>';
+}
+
+function jobCardHTML(j) {
+  const items=(j.items||[]).filter(i=>i.desc);
+  const total=(j.items||[]).reduce((s,i)=>s+(parseFloat(i.crp)||0)*(parseInt(i.qty)||1),0);
+  const sl={pending:'Pending','in-progress':'In Progress',done:'Done'};
+  return `<div class="job-card status-${j.status}" onclick="viewJob('${j.id}')">
+    <div class="job-header">
+      <div>
+        <div class="job-title">${j.customer||'Unknown'} <span style="font-size:0.83rem;color:var(--muted)">#${j.otf||'—'}</span></div>
+        <div class="job-meta">
+          ${j.model?`<span class="meta-item">🚗 <strong>${j.model}</strong></span>`:''}
+          ${j.chassis?`<span class="meta-item">🔩 ${j.chassis}</span>`:''}
+          ${j.reg?`<span class="meta-item">🪪 ${j.reg}</span>`:''}
+          ${j.date?`<span class="meta-item">📅 ${j.date}</span>`:''}
+          ${total?`<span class="meta-item">₹ <strong>${total.toLocaleString('en-IN')}</strong></span>`:''}
+        </div>
+      </div>
+      <span class="badge badge-${j.status}">${sl[j.status]||j.status}</span>
+    </div>
+    ${items.length?`<div class="job-items">${items.slice(0,5).map(i=>`<span class="item-chip">${i.desc}</span>`).join('')}${items.length>5?`<span class="item-chip">+${items.length-5} more</span>`:''}</div>`:''}
+    <div class="job-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-secondary btn-sm" onclick="editJob('${j.id}')">✏️ Edit</button>
+      ${j.status!=='done'?`<button class="btn btn-success btn-sm" onclick="markStatus('${j.id}','done')">✅ Done</button>`:''}
+      ${j.status==='pending'?`<button class="btn btn-scan btn-sm" onclick="markStatus('${j.id}','in-progress')">🔧 Start</button>`:''}
+      <button class="btn btn-danger btn-sm" onclick="deleteJob('${j.id}')">🗑️</button>
+    </div>
+  </div>`;
+}
+
+// ── VIEW ──────────────────────────────────────────────────────────────────────
+function viewJob(id) {
+  const j=jobs.find(x=>x.id===id); if(!j) return;
+  const items=(j.items||[]).filter(i=>i.desc);
+  const total=items.reduce((s,i)=>s+(parseFloat(i.crp)||0)*(parseInt(i.qty)||1),0);
+  const sl={pending:'Pending','in-progress':'In Progress',done:'Done'};
+  document.getElementById('view-content').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <div>
+        <h2 style="font-family:'Rajdhani';font-size:1.5rem;">${j.customer||'—'}</h2>
+        <div style="color:var(--muted);font-size:0.8rem;">OTF #${j.otf||'—'} · ${j.outlet||''} · ${j.date||''}</div>
+      </div>
+      <span class="badge badge-${j.status}" style="font-size:0.78rem;padding:5px 14px">${sl[j.status]||j.status}</span>
+    </div>
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase">Model</div><div>${j.model||'—'}</div></div>
+      <div><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase">Chassis</div><div>${j.chassis||'—'}</div></div>
+      <div><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase">Reg No</div><div>${j.reg||'—'}</div></div>
+      <div><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase">Engine</div><div>${j.engine||'—'}</div></div>
+      <div><div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase">Delivery</div><div>${j.delivery||'—'}</div></div>
+    </div>
+    ${j.notes?`<div style="background:var(--bg);border-radius:8px;padding:10px;font-size:0.83rem;color:var(--muted);margin-bottom:14px;">📝 ${j.notes}</div>`:''}
+    ${items.length?`<div class="section-title">Accessories</div>
+    <table class="detail-items"><thead><tr><th>#</th><th>Description</th><th>Part No</th><th>Qty</th><th>CRP (₹)</th><th>Total</th></tr></thead><tbody>
+      ${items.map((i,n)=>`<tr><td>${n+1}</td><td>${i.desc}</td><td style="color:var(--muted)">${i.part||'—'}</td><td>${i.qty||1}</td><td>${i.crp||'—'}</td><td>${((parseFloat(i.crp)||0)*(parseInt(i.qty)||1)).toLocaleString('en-IN')}</td></tr>`).join('')}
+      <tr class="total-row"><td colspan="5" style="text-align:right">TOTAL</td><td>₹ ${total.toLocaleString('en-IN')}</td></tr>
+    </tbody></table>`:''}
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('view-modal')">Close</button>
+      <button class="btn btn-primary" onclick="closeModal('view-modal');editJob('${j.id}')">✏️ Edit</button>
+    </div>`;
+  openModal('view-modal');
+}
+
+// ── STATUS ────────────────────────────────────────────────────────────────────
+async function markStatus(id, status) {
+  const j=jobs.find(x=>x.id===id); if(!j) return;
+  j.status=status;
+  localStorage.setItem('otf_jobs',JSON.stringify(jobs));
+  pushJob(j);
+  toast(status==='done'?'✅ Done!':'🔧 Started!', status==='done'?'var(--green)':'var(--accent2)');
+  renderDashboard(); renderJobs();
+}
+
+async function deleteJob(id) {
+  if(!confirm('Delete this job?')) return;
+  jobs=jobs.filter(x=>x.id!==id);
+  localStorage.setItem('otf_jobs',JSON.stringify(jobs));
+  deleteJobRemote(id);
+  toast('🗑️ Deleted','var(--red)');
+  renderDashboard(); renderJobs();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(id){document.getElementById(id).classList.remove('hidden');}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+
+function openNewJobModal(prefill) {
+  document.getElementById('modal-title').textContent='NEW JOB';
+  document.getElementById('edit-id').value='';
+  clearForm();
+  if(prefill) applyPrefill(prefill);
+  if(!(prefill&&(prefill.items||[]).length)) addItemRow();
+  updateTotal(); openModal('job-modal');
+}
+
+function editJob(id) {
+  const j=jobs.find(x=>x.id===id); if(!j) return;
+  document.getElementById('modal-title').textContent='EDIT JOB';
+  document.getElementById('edit-id').value=id;
+  const fields={customer:'f-customer',otf:'f-otf',outlet:'f-outlet',date:'f-date',reg:'f-reg',chassis:'f-chassis',engine:'f-engine',model:'f-model',delivery:'f-delivery',status:'f-status',notes:'f-notes'};
+  Object.entries(fields).forEach(([k,id])=>document.getElementById(id).value=j[k]||'');
+  document.getElementById('items-body').innerHTML='';
+  (j.items||[]).forEach(i=>addItemRow(i));
+  if(!(j.items||[]).length) addItemRow();
+  updateTotal(); openModal('job-modal');
+}
+
+function clearForm() {
+  ['f-customer','f-otf','f-outlet','f-date','f-reg','f-chassis','f-engine','f-model','f-delivery','f-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-status').value='pending';
+  document.getElementById('items-body').innerHTML='';
+}
+
+function applyPrefill(p) {
+  const map={customer:'f-customer',otf:'f-otf',outlet:'f-outlet',date:'f-date',reg:'f-reg',chassis:'f-chassis',engine:'f-engine',model:'f-model',delivery:'f-delivery',notes:'f-notes'};
+  Object.entries(map).forEach(([k,id])=>{ if(p[k]) document.getElementById(id).value=p[k]; });
+  document.getElementById('items-body').innerHTML='';
+  (p.items||[]).forEach(i=>addItemRow(i));
+}
+
+function addItemRow(item) {
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td><input type="text" placeholder="e.g. Mud Flap Set" value="${(item&&item.desc)||''}" oninput="updateTotal()"></td>
+    <td><input type="text" placeholder="Part no." value="${(item&&item.part)||''}"></td>
+    <td><input type="number" min="1" value="${(item&&item.qty)||1}" style="width:52px" oninput="updateTotal()"></td>
+    <td><input type="number" min="0" value="${(item&&item.crp)||''}" oninput="updateTotal()"></td>
+    <td><select style="width:75px"><option value="pending" ${(!item||item.status==='pending')?'selected':''}>⏳</option><option value="done" ${(item&&item.status==='done')?'selected':''}>✅</option></select></td>
+    <td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();updateTotal()">×</button></td>`;
+  document.getElementById('items-body').appendChild(tr); updateTotal();
+}
+
+function updateTotal() {
+  let t=0;
+  document.querySelectorAll('#items-body tr').forEach(tr=>{
+    const inp=tr.querySelectorAll('input');
+    t+=(parseFloat(inp[3].value)||0)*(parseInt(inp[2].value)||1);
+  });
+  document.getElementById('total-display').textContent=t?`Total: ₹ ${t.toLocaleString('en-IN')}`:'' ;
+}
+
+function saveJob() {
+  const customer=document.getElementById('f-customer').value.trim();
+  if(!customer){alert('Customer name is required!');return;}
+  const items=[];
+  document.querySelectorAll('#items-body tr').forEach(tr=>{
+    const inp=tr.querySelectorAll('input'); const sel=tr.querySelector('select');
+    items.push({desc:inp[0].value.trim(),part:inp[1].value.trim(),qty:inp[2].value||1,crp:inp[3].value,status:sel.value});
+  });
+  const eid=document.getElementById('edit-id').value;
+  const job={
+    id:eid||genId(), customer,
+    otf:document.getElementById('f-otf').value,
+    outlet:document.getElementById('f-outlet').value,
+    date:document.getElementById('f-date').value,
+    reg:document.getElementById('f-reg').value,
+    chassis:document.getElementById('f-chassis').value,
+    engine:document.getElementById('f-engine').value,
+    model:document.getElementById('f-model').value,
+    delivery:document.getElementById('f-delivery').value,
+    status:document.getElementById('f-status').value,
+    notes:document.getElementById('f-notes').value,
+    items
+  };
+  if(eid){const idx=jobs.findIndex(x=>x.id===eid);jobs[idx]=job;toast('✏️ Updated!');}
+  else{jobs.push(job);toast('✅ Saved!');}
+  localStorage.setItem('otf_jobs',JSON.stringify(jobs));
+  pushJob(job);
+  closeModal('job-modal'); renderDashboard(); renderJobs();
+}
+
+// ── SCAN ──────────────────────────────────────────────────────────────────────
+function handleScanFile(e){const f=e.target.files[0];if(f)processScanFile(f);}
+
+function processScanFile(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById('scan-preview').src=e.target.result;
+    document.getElementById('scan-preview').classList.remove('hidden');
+    document.getElementById('scan-drop').classList.add('hidden');
+    runAIScan(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+// AI scan uses a CORS proxy for Anthropic API when running from GitHub Pages
+async function runAIScan(dataUrl) {
+  document.getElementById('scan-status').classList.remove('hidden');
+  document.getElementById('scan-result-box').classList.add('hidden');
+  animateProgress();
+
+  const base64=dataUrl.split(',')[1];
+  const mediaType=(dataUrl.match(/data:([^;]+)/)||[])[1]||'image/jpeg';
+
+  const prompt=`You are an OCR assistant for a Mahindra dealership. Extract ALL data from this handwritten Order Taking Form image.
+Return ONLY valid JSON, no extra text:
+{
+  "customer":"name","otf":"form number (red digits top right)",
+  "outlet":"branch name","date":"YYYY-MM-DD",
+  "reg":"reg number","chassis":"chassis number","engine":"engine number",
+  "model":"vehicle model","delivery":"YYYY-MM-DD","notes":"any notes",
+  "items":[{"desc":"item description","part":"part number","qty":1,"crp":0}]
+}
+Read every filled row carefully. Return ONLY the JSON object.`;
+
+  // Use allorigins.win as a CORS proxy for the Anthropic API call
+  const apiBody = JSON.stringify({
+    model:'claude-sonnet-4-20250514', max_tokens:1500,
+    messages:[{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+      {type:'text',text:prompt}
+    ]}]
+  });
+
+  try {
+    // Try direct call first (works in Claude.ai artifact context)
+    let text = '';
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:apiBody
+      });
+      const d = await r.json();
+      text = (d.content||[]).map(c=>c.text||'').join('');
+    } catch(e1) {
+      // Fallback: use cors-anywhere or allorigins proxy
+      const proxyUrl = 'https://api.allorigins.win/post?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages');
+      const r2 = await fetch(proxyUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'https://api.anthropic.com/v1/messages',body:apiBody})});
+      const d2 = await r2.json();
+      text = d2.contents || '';
+    }
+
+    document.getElementById('ai-raw-output').textContent = text || 'No response received.';
+    try { scannedData = JSON.parse(text.replace(/```json|```/g,'').trim()); }
+    catch { scannedData = null; }
+    document.getElementById('scan-status').classList.add('hidden');
+    document.getElementById('scan-result-box').classList.remove('hidden');
+  } catch(err){
+    document.getElementById('scan-status-text').textContent = 'Scan error: ' + err.message;
+    document.getElementById('scan-result-box').classList.remove('hidden');
+    document.getElementById('ai-raw-output').textContent = 'Could not read image. Please fill in the form manually.';
+    scannedData = null;
+    document.getElementById('scan-status').classList.add('hidden');
+  }
+}
+
+function animateProgress(){
+  const bar=document.getElementById('scan-progress'); let w=0;
+  const t=setInterval(()=>{w+=Math.random()*9;if(w>90){clearInterval(t);return;}bar.style.width=w+'%';},300);
+}
+
+function openScannedForm(){
+  if(scannedData){
+    if(scannedData.date) scannedData.date=scannedData.date.replace(/(\d{2})\/(\d{2})\/(\d{2,4})/,(_,d,m,y)=>`${y.length===2?'20'+y:y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
+    openNewJobModal(scannedData);
+  } else { openNewJobModal(); }
+  switchTab('jobs');
+}
+
+function resetScan(){
+  document.getElementById('scan-preview').classList.add('hidden');
+  document.getElementById('scan-drop').classList.remove('hidden');
+  document.getElementById('scan-status').classList.add('hidden');
+  document.getElementById('scan-result-box').classList.add('hidden');
+  document.getElementById('scan-file').value='';
+  document.getElementById('scan-progress').style.width='0';
+  scannedData=null;
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+
+function toast(msg,color='var(--green)'){
+  const el=document.createElement('div');
+  el.className='toast';el.textContent=msg;el.style.borderLeftColor=color;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),3000);
+}
+
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);});
+});
+
+const sd=document.getElementById('scan-drop');
+sd.addEventListener('dragover',e=>{e.preventDefault();sd.style.borderColor='var(--blue)';});
+sd.addEventListener('dragleave',()=>sd.style.borderColor='');
+sd.addEventListener('drop',e=>{e.preventDefault();sd.style.borderColor='';const f=e.dataTransfer.files[0];if(f)processScanFile(f);});
+</script>
+</body>
+</html>
